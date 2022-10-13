@@ -31665,7 +31665,7 @@ if is_a_wb_script==1:
                 (assign, ":imod_end", imod_fresh),
             (else_try),
                 (assign, ":imod_start", imod_fine),
-                (assign, ":imod_end", imod_large_bag+1),
+                (assign, ":imod_end", imod_lame),
             (try_end),
 
             #Find and store what modifiers this item has

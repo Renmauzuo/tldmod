@@ -8576,7 +8576,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ], "{s23} {s24}", "lord_offer_item",[]],
 
     [anyone|plyr,"lord_offer_item", [
-        (troop_get_inventory_capacity, ":free_capacity", "trp_player"),
+        (store_free_inventory_capacity, ":free_capacity"),
         (gt, ":free_capacity", 0), #skip this option if the player has no room
     ], "Thank you, I shall see  that it is put to good use.", "close_window",[
         (troop_add_item, "trp_player", reg40, reg41),
