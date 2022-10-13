@@ -1991,7 +1991,7 @@ scripts = [
 	# Set Light Armor Slot for Berserker Trait
 	(call_script, "script_set_slot_light_armor"),
 
-    (assign,"$savegame_version", 30),  #Rafa: Savegame version
+    (assign,"$savegame_version", 31),  #Rafa: Savegame version
     (assign,"$original_savegame_version", "$savegame_version"),
     
 	] + (is_a_wb_script==1 and [
@@ -31497,10 +31497,13 @@ if is_a_wb_script==1:
             (ge, ":player_relation", 20),
             (troop_get_slot, ":random", ":troop_no", slot_troop_friendship_roll),
             (le, ":random", ":player_relation"),
-            (troop_set_slot, ":troop_no", slot_troop_friendship_reward, friendship_reward_troops), #In the future different values could be used for different types of gifts
+            #Randomly select a reward
+            #TODO: Ren - Make the selection sensitive to player's needs, ie not giving troops when party is full
+            (store_random_in_range, ":random_reward", friendship_reward_troops, friendship_reward_end),
+            (troop_set_slot, ":troop_no", slot_troop_friendship_reward, ":random_reward"),
             
             (val_add, ":cur_hours", 72), #Only choose to give a reward once per 3 days. Could maybe tweak this with options
-            (troop_set_slot, ":troop_no", slot_troop_friendship_reward_hours, ":cur_hours"), #In the future different values could be used for different types of gifts
+            (troop_set_slot, ":troop_no", slot_troop_friendship_reward_hours, ":cur_hours"),
         ]),
 
 
@@ -31600,6 +31603,97 @@ if is_a_wb_script==1:
 
             (assign, reg40, ":reward_troop"),
             (assign, reg41, ":troop_count"),
+        ]),
+
+
+    # Determines the type and quality of item a lord would like to award the player
+    # #script_lord_reward_item
+    # # INPUT: troop_no
+    # # OUTPUT: reward_item, item_quality
+    ("lord_reward_item",
+        [
+            (store_script_param, ":troop_no", 1),
+
+            #Non-combat rulers don't wear appropriate gear, so if it's one of them we subsitute a high tier faction troop
+            (try_begin),
+                (eq, ":troop_no", "trp_lorien_lord"),
+                (assign, ":gear_troop", "trp_a6_lorien_grey_warden"),
+            (else_try),
+                (eq, ":troop_no", "trp_mordor_lord"),
+                (assign, ":gear_troop", "trp_c5_mordor_num_knight"), #Knight so horses can be given
+            (else_try),
+                (eq, ":troop_no", "trp_gondor_lord"),
+                (assign, ":gear_troop", "trp_c6_gon_tower_knight"),
+            (else_try),
+                (eq, ":troop_no", "trp_isengard_lord"),
+                (assign, ":gear_troop", "trp_a6_lorien_grey_warden"),
+            (else_try),
+                #Combat lords give rewards based on their own gear
+                (assign, ":gear_troop", ":troop_no"),
+            (end_try),
+
+            (assign, ":eligible_items", 0),
+            (try_for_range, ":item_slot", ek_item_0, ek_food),
+                (troop_get_inventory_slot, ":item", ":gear_troop", ":item_slot"),
+
+                #Skip if slot is empty
+                (neq, ":item", -1),
+
+                #Dont' give out unique items this way
+                (neg|item_has_property, ":item", itp_unique),
+
+                #If item is eligible store it in the array
+                (troop_set_slot, "trp_temp_array_a", ":eligible_items", ":item"),
+                
+                #Increment after storing to prevent off by one errors
+                (val_add, ":eligible_items", 1),
+            (end_try),
+
+            #Shuffle and pick reward
+            (call_script, "script_shuffle_troop_slots", "trp_temp_array_a", 0, ":eligible_items"),
+            (troop_get_slot, ":reward_item", "trp_temp_array_a", 0),
+
+            #Save "plain" as a baseline
+            (troop_set_slot, "trp_temp_array_a", 0, imod_plain),
+            (assign, ":eligible_imods", 0),
+
+            #Since we only want good mods (or plain) we need to figure out if this is a horse or not
+            (item_get_type, ":item_type", ":reward_item"),
+            (try_begin),
+                (eq, ":item_type", itp_type_horse),
+                (assign, ":imod_start", imod_stubborn),
+                (assign, ":imod_end", imod_fresh),
+            (else_try),
+                (assign, ":imod_start", imod_fine),
+                (assign, ":imod_end", imod_large_bag+1),
+            (try_end),
+
+            #Find and store what modifiers this item has
+            (try_for_range, ":imod", ":imod_start", ":imod_end"),
+                (item_has_modifier, ":reward_item", ":imod"),
+                (val_add, ":eligible_imods", 1), #Unlike above, this goes first. It's intentionally "off by one" so that only 100 gives the best quality
+                (troop_set_slot, "trp_temp_array_a", ":eligible_imods", ":imod"),
+            (end_try),
+
+            (assign, reg40, ":reward_item"),
+
+            #Guard against div 0 error if no eligible mods are found
+            (try_begin),
+                (eq, ":eligible_imods", 0),
+                (assign, reg41, imod_plain),
+            (else_try),
+                (call_script, "script_troop_get_player_relation", ":troop_no"),
+                (assign, ":player_relation", reg0),
+
+                #Scale item quality based on relation
+                (assign, ":imod_range", 100),
+                (val_div, ":imod_range", ":eligible_imods"),
+                
+                (assign, ":selected_mod", ":player_relation"),
+                (val_div, ":selected_mod", ":imod_range"),
+
+                (troop_get_slot, reg41, "trp_temp_array_a", ":selected_mod"),
+            (try_end),
         ]),
     #Retainers End
 
