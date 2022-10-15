@@ -31697,5 +31697,21 @@ if is_a_wb_script==1:
         ]),
     #Retainers End
 
+    # Checks if the talk troop is the same faction as the player and stores the result in reg49
+    # Used to modify some dialog to make it more appropriate if the player is from the same faction as the NPC
+    # #script_match_talk_troop_faction
+    # # INPUT: none
+    # # OUTPUT: 1 if factions match, 0 if they don't
+    ("match_talk_troop_faction",
+        [
+            (try_begin),
+            (store_faction_of_troop, ":npc_faction", "$g_talk_troop"),
+            (eq, "$players_kingdom", ":npc_faction"),
+            (assign, reg49, 1),
+            (else_try),
+            (assign, reg49, 0),
+            (try_end),
+        ]),
+
 
 ] or []) 

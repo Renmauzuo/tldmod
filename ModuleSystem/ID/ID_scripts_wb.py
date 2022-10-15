@@ -753,5 +753,6 @@ script_assign_retainers = 751
 script_cf_lord_friendship_reward = 752
 script_lord_reward_troops = 753
 script_lord_reward_item = 754
+script_match_talk_troop_faction = 755
 
 

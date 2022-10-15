@@ -1039,7 +1039,8 @@ dialogs = [
                      (eq, "$g_talk_troop_met", 0),
                      (troop_get_slot, ":intro", "$g_talk_troop", slot_troop_intro),
                      (str_store_string, 5, ":intro"),
-                     (str_store_party_name, 20, "$g_encountered_party"),],
+                     (str_store_party_name, 20, "$g_encountered_party"),
+                     (call_script, "script_match_talk_troop_faction"),],
 "{s5}", "companion_recruit_intro_response", [(troop_set_slot, "$g_talk_troop", slot_troop_first_encountered, "$g_encountered_party"),]],
 
 
