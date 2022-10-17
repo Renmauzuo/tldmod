@@ -3974,7 +3974,7 @@ Your duty is to help in our struggle, {playername}. When you prove yourself wort
 ##### TODO: QUESTS COMMENT OUT BEGIN
 [anyone|plyr,"lord_talk", [(eq, "$cheat_mode", 1)], "Increase Relation", "lord_pretalk",[(call_script, "script_change_player_relation_with_troop", "$g_talk_troop", 5),]],
 #Retainers Begin
-[anyone|plyr,"lord_talk", [(eq, "$cheat_mode", 1)], "Force Friendship Reward", "lord_pretalk",[(troop_set_slot, "$g_talk_troop", slot_troop_friendship_reward, friendship_reward_item),]],
+[anyone|plyr,"lord_talk", [(eq, "$cheat_mode", 1)], "Force Friendship Reward", "lord_pretalk",[(troop_set_slot, "$g_talk_troop", slot_troop_friendship_reward, friendship_reward_gear),]],
 [anyone|plyr,"lord_talk", [(eq, "$cheat_mode", 1)], "Roll for Friendship Reward", "lord_pretalk",[(call_script, "script_cf_lord_friendship_reward", "$g_talk_troop"),]],
 #Retainers End
 [anyone|plyr,"lord_talk",[#(troop_slot_eq, "$g_talk_troop", slot_troop_is_prisoner, 0),
@@ -8540,11 +8540,11 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     [anyone|plyr,"lord_offer_troops", [], "I fear I cannot accept them at this time.", "close_window",[(call_script,"script_stand_back"),(eq,"$talk_context",tc_party_encounter),(assign, "$g_leave_encounter", 1)]],
 
     [anyone,"lord_leave", [
-    (troop_slot_eq, "$g_talk_troop", slot_troop_friendship_reward, friendship_reward_item),
+    (troop_slot_eq, "$g_talk_troop", slot_troop_friendship_reward, friendship_reward_gear),
     (troop_set_slot, "$g_talk_troop", slot_troop_friendship_reward, friendship_reward_none),
     (call_script, "script_troop_get_player_relation", "$g_talk_troop"),
     (assign, ":player_relation", reg0),
-    (call_script, "script_lord_reward_item", "$g_talk_troop"),
+    (call_script, "script_lord_reward_equipment", "$g_talk_troop"),
     (str_store_item_name, s22, reg40),
 
     (try_begin),

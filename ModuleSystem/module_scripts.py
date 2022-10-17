@@ -31607,10 +31607,10 @@ if is_a_wb_script==1:
 
 
     # Determines the type and quality of item a lord would like to award the player
-    # #script_lord_reward_item
+    # #script_lord_reward_equipment
     # # INPUT: troop_no
     # # OUTPUT: reward_item, item_quality
-    ("lord_reward_item",
+    ("lord_reward_equipment",
         [
             (store_script_param, ":troop_no", 1),
 
@@ -31626,7 +31626,7 @@ if is_a_wb_script==1:
                 (assign, ":gear_troop", "trp_c6_gon_tower_knight"),
             (else_try),
                 (eq, ":troop_no", "trp_isengard_lord"),
-                (assign, ":gear_troop", "trp_a6_lorien_grey_warden"),
+                (assign, ":gear_troop", "trp_i6_isen_uruk_berserker"),
             (else_try),
                 #Combat lords give rewards based on their own gear
                 (assign, ":gear_troop", ":troop_no"),
