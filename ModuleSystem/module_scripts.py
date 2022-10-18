@@ -31653,47 +31653,52 @@ if is_a_wb_script==1:
             (call_script, "script_shuffle_troop_slots", "trp_temp_array_a", 0, ":eligible_items"),
             (troop_get_slot, ":reward_item", "trp_temp_array_a", 0),
 
-            #Save "plain" as a baseline
-            (troop_set_slot, "trp_temp_array_a", 0, imod_plain),
-            (assign, ":eligible_imods", 0),
-
-            #Since we only want good mods (or plain) we need to figure out if this is a horse or not
+            #Get appropriate mods based on item type
             (item_get_type, ":item_type", ":reward_item"),
+            (assign, ":mod0", imod_plain),
             (try_begin),
                 (eq, ":item_type", itp_type_horse),
-                (assign, ":imod_start", imod_stubborn),
-                (assign, ":imod_end", imod_fresh),
+                (assign, ":mod1", imod_stubborn),
+                (assign, ":mod2", imod_spirited),
+                (assign, ":mod3", imod_champion),
             (else_try),
-                (assign, ":imod_start", imod_fine),
-                (assign, ":imod_end", imod_lame),
+                (this_or_next | eq, ":item_type", itp_type_arrows),
+                (this_or_next | eq, ":item_type", itp_type_bolts),
+                (this_or_next | eq, ":item_type", itp_type_bullets),
+                (eq, ":item_type", itp_type_thrown),
+                (assign, ":mod1", imod_fine),
+                (assign, ":mod2", imod_balanced),
+                (assign, ":mod3", imod_large_bag),
+            (else_try),
+                (is_between, ":item_type", itp_type_head_armor, itp_type_pistol),
+                (assign, ":mod1", imod_thick),
+                (assign, ":mod2", imod_reinforced),
+                (assign, ":mod3", imod_masterwork),
+            (else_try),
+                (assign, ":mod1", imod_balanced),
+                (assign, ":mod2", imod_tempered),
+                (assign, ":mod3", imod_masterwork),
             (try_end),
 
-            #Find and store what modifiers this item has
-            (try_for_range, ":imod", ":imod_start", ":imod_end"),
-                (item_has_modifier, ":reward_item", ":imod"),
-                (val_add, ":eligible_imods", 1), #Unlike above, this goes first. It's intentionally "off by one" so that only 100 gives the best quality
-                (troop_set_slot, "trp_temp_array_a", ":eligible_imods", ":imod"),
-            (end_try),
+            (call_script, "script_troop_get_player_relation", ":troop_no"),
+            (assign, ":player_relation", reg0),
+
+            (try_begin),
+                (ge, ":player_relation", 90),
+                (assign, ":selected_mod", ":mod3"),
+            (else_try),
+                (ge, ":player_relation", 60),
+                (assign, ":selected_mod", ":mod2"),
+            (else_try),
+                (ge, ":player_relation", 30),
+                (assign, ":selected_mod", ":mod1"),
+            (else_try),
+                (assign, ":selected_mod", ":mod0"),
+            (try_end),
+
 
             (assign, reg40, ":reward_item"),
-
-            #Guard against div 0 error if no eligible mods are found
-            (try_begin),
-                (eq, ":eligible_imods", 0),
-                (assign, reg41, imod_plain),
-            (else_try),
-                (call_script, "script_troop_get_player_relation", ":troop_no"),
-                (assign, ":player_relation", reg0),
-
-                #Scale item quality based on relation
-                (assign, ":imod_range", 100),
-                (val_div, ":imod_range", ":eligible_imods"),
-                
-                (assign, ":selected_mod", ":player_relation"),
-                (val_div, ":selected_mod", ":imod_range"),
-
-                (troop_get_slot, reg41, "trp_temp_array_a", ":selected_mod"),
-            (try_end),
+            (assign, reg41, ":selected_mod"),
         ]),
     #Retainers End
 
