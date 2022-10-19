@@ -1040,7 +1040,13 @@ dialogs = [
                      (troop_get_slot, ":intro", "$g_talk_troop", slot_troop_intro),
                      (str_store_string, 5, ":intro"),
                      (str_store_party_name, 20, "$g_encountered_party"),
-                     (call_script, "script_match_talk_troop_faction"),],
+                     ] + (is_a_wb_dialog and [
+                     #See if player and hero are same faction in Warband
+                     (call_script, "script_match_talk_troop_faction"),
+                     ] or [
+                     #Above script doesn't work in M&B so just skip this part and keep default behavior
+                     (assign, reg49, 0),
+                     ]) ,
 "{s5}", "companion_recruit_intro_response", [(troop_set_slot, "$g_talk_troop", slot_troop_first_encountered, "$g_encountered_party"),]],
 
 
